@@ -460,7 +460,8 @@ def collect_parts(
     use_style_theme=True,
     use_lighting=True,
     use_camera=True,
-    use_details=True
+    use_details=True,
+    use_anima_artists=False
 ):
     folder = DATA_DIR / category / gender
     counts = apply_mode_counts(get_counts(prompt_length), generation_mode, prompt_length)
@@ -548,6 +549,7 @@ def collect_parts(
         "lighting": random_multiple_from_file(folder / "lighting.txt", counts["lighting"]) if use_lighting else [],
         "camera": random_multiple_from_file(folder / "camera.txt", counts["camera"]) if use_camera else [],
         "details": random_multiple_from_file(folder / "details.txt", counts["details"]) if use_details else [],
+        "anima_artists": random_multiple_from_file(PROMPT_LIBRARY_DIR / "anima_artists.txt", 1) if use_anima_artists else [],
     }
 
     if gender.lower() == "female":
@@ -864,6 +866,7 @@ def build_anima_prompt(parts, gender="female"):
     extend(["lighting"])
     extend(["interior", "exterior", "simple_background"])
     extend(["artstyle"])
+    extend(["anima_artists"])
     extend(["style_theme"])
     extend(["details"])
     extend(["boosters"])
@@ -943,7 +946,8 @@ def build_prompt(
     use_lighting=True,
     use_camera=True,
     use_details=True,
-    use_boosters=True
+    use_boosters=True,
+    use_anima_artists=False
 ):
     parts = collect_parts(
         category=category,
@@ -1012,7 +1016,8 @@ def build_prompt(
         use_style_theme=use_style_theme,
         use_lighting=use_lighting,
         use_camera=use_camera,
-        use_details=use_details
+        use_details=use_details,
+        use_anima_artists=use_anima_artists
     )
 
     parts["category"] = category
