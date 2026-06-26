@@ -1,0 +1,162 @@
+castle hall
+grand castle hall
+royal castle interior
+castle corridor
+castle chamber
+castle dining hall
+castle ballroom
+bedroom
+luxury bedroom
+modern bedroom
+cozy bedroom
+elegant bedroom
+royal bedroom
+library
+grand library
+ancient library
+scholarly library
+private library
+studio room
+artist studio
+creative studio
+photography studio
+recording studio
+throne room
+royal throne room
+imperial throne room
+ornate throne room
+magic academy classroom
+academy classroom
+arcane classroom
+mage classroom
+luxury apartment
+modern luxury apartment
+penthouse interior
+designer apartment
+cathedral interior
+grand cathedral
+gothic cathedral
+sacred cathedral
+living room
+modern living room
+luxury living room
+cozy living room
+elegant living room
+kitchen
+modern kitchen
+rustic kitchen
+luxury kitchen
+dining room
+formal dining room
+royal dining hall
+bathroom
+luxury bathroom
+spa bathroom
+walk in closet
+luxury dressing room
+fashion showroom
+boutique interior
+shopping mall interior
+hotel lobby
+luxury hotel suite
+executive office
+corporate office
+private office
+conference room
+board room
+classroom
+university lecture hall
+research laboratory
+science lab
+medical laboratory
+hospital room
+clinic interior
+coffee shop interior
+cafe interior
+restaurant interior
+luxury restaurant
+bar interior
+cocktail lounge
+nightclub interior
+music hall
+opera house interior
+concert hall
+theater interior
+cinema interior
+museum interior
+art gallery
+exhibition hall
+temple interior
+shrine interior
+monastery interior
+prayer hall
+meditation room
+wizard tower interior
+mage study
+alchemy laboratory
+arcane workshop
+enchanted library
+magic laboratory
+summoning chamber
+ritual chamber
+crystal chamber
+royal council chamber
+war room
+knight hall
+armory interior
+training hall
+dojo interior
+martial arts hall
+samurai residence
+tea room
+traditional japanese interior
+tatami room
+onsen interior
+victorian parlor
+victorian mansion interior
+noble manor interior
+aristocratic salon
+ballroom interior
+royal palace interior
+princess chamber
+queen's chamber
+king's chamber
+steampunk workshop
+clockwork laboratory
+inventor workshop
+cyberpunk apartment
+futuristic control room
+space station interior
+spaceship bridge
+science fiction laboratory
+high tech command center
+neon lounge
+holographic control room
+post apocalyptic shelter
+underground bunker
+survivor hideout
+desert palace interior
+oasis residence
+tribal longhouse
+tribal ceremonial hall
+ice palace interior
+crystal palace interior
+elven hall
+high elf palace
+fae sanctuary
+celestial temple
+angelic sanctuary
+demonic throne room
+dragon lair interior
+ancient ruin interior
+forgotten temple interior
+hidden chamber
+secret passage
+treasure vault
+vault interior
+wine cellar
+royal treasury
+greenhouse interior
+botanical conservatory
+indoor garden
+winter garden

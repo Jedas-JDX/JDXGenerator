@@ -1,0 +1,60 @@
+japanese
+korean
+chinese
+thai
+vietnamese
+filipino
+indonesian
+malaysian
+mongolian
+german
+french
+italian
+spanish
+portuguese
+swedish
+norwegian
+danish
+finnish
+icelandic
+british
+irish
+scottish
+polish
+czech
+hungarian
+romanian
+ukrainian
+russian
+greek
+turkish
+brazilian
+argentinian
+chilean
+colombian
+peruvian
+mexican
+cuban
+american
+canadian
+ethiopian
+nigerian
+kenyan
+ghanaian
+south african
+egyptian
+moroccan
+algerian
+indian
+pakistani
+bangladeshi
+sri lankan
+middle eastern
+arabian
+persian
+lebanese
+hawaiian
+polynesian
+samoan
+mixed heritage
+multiracial appearance

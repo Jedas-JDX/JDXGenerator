@@ -1,0 +1,93 @@
+t-shirt
+fitted t-shirt
+muscle fit t-shirt
+designer t-shirt
+fashion t-shirt
+tank top
+athletic tank top
+fitness tank top
+muscle tank top
+stringer tank top
+shirt
+dress shirt
+button up shirt
+partially unbuttoned shirt
+open collar shirt
+tailored shirt
+designer shirt
+fashion shirt
+silk shirt
+linen shirt
+short sleeve shirt
+long sleeve shirt
+sweater
+knit sweater
+turtleneck sweater
+fitted sweater
+designer sweater
+hoodie
+oversized hoodie
+zip hoodie
+fashion hoodie
+designer hoodie
+armor top
+fantasy armor top
+battle armor top
+knight armor
+warrior armor
+paladin armor
+kimono top
+traditional kimono top
+samurai kimono top
+martial arts gi
+training gi
+compression shirt
+athletic compression shirt
+fitness shirt
+training shirt
+sports jersey
+basketball jersey
+soccer jersey
+baseball jersey
+track jacket top
+tactical shirt
+combat shirt
+military shirt
+uniform shirt
+business shirt
+executive shirt
+formal shirt
+luxury shirt
+designer menswear top
+fashion menswear top
+tailored menswear top
+open chest shirt
+deep v neck shirt
+v neck shirt
+henley shirt
+polo shirt
+cashmere sweater
+luxury knitwear
+streetwear top
+urban fashion top
+techwear top
+cyberpunk top
+futuristic shirt
+steampunk shirt
+victorian shirt
+gothic shirt
+punk fashion top
+samurai armor top
+ninja top
+ranger tunic
+adventurer tunic
+mage robes
+wizard robes
+royal tunic
+noble attire top
+prince attire top
+king attire top
+heroic armor
+dragon knight armor
+anime protagonist outfit top
+shonen hero top

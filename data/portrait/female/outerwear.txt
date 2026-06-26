@@ -1,0 +1,140 @@
+jacket
+fashion jacket
+designer jacket
+tailored jacket
+casual jacket
+light jacket
+heavy jacket
+coat
+long coat
+trench coat
+double breasted coat
+wool coat
+winter coat
+luxury coat
+designer coat
+cape
+royal cape
+heroic cape
+flowing cape
+ornate cape
+fantasy cape
+cloak
+travelers cloak
+adventurer cloak
+hooded cloak
+mage cloak
+royal cloak
+fur lined cloak
+cardigan
+long cardigan
+knit cardigan
+oversized cardigan
+cropped cardigan
+hooded cardigan
+leather jacket
+black leather jacket
+fitted leather jacket
+biker jacket
+motorcycle jacket
+fur coat
+luxury fur coat
+winter fur coat
+bolero jacket
+cropped bolero jacket
+shrug jacket
+blazer
+tailored blazer
+fashion blazer
+designer blazer
+formal blazer
+business blazer
+military jacket
+officer coat
+ceremonial coat
+uniform jacket
+bomber jacket
+aviator jacket
+flight jacket
+varsity jacket
+college jacket
+denim jacket
+oversized denim jacket
+distressed denim jacket
+parka
+winter parka
+fur lined parka
+puffer jacket
+quilted jacket
+down jacket
+raincoat
+hooded raincoat
+waterproof coat
+windbreaker
+sport windbreaker
+athletic jacket
+track jacket
+fitness jacket
+hoodie
+oversized hoodie
+zip hoodie
+fashion hoodie
+designer hoodie
+sweater coat
+poncho
+fashion poncho
+winter poncho
+shawl
+elegant shawl
+lace shawl
+silk shawl
+wrap coat
+duster coat
+longline coat
+open front coat
+cashmere coat
+luxury outerwear
+designer outerwear
+fashion outerwear
+runway outerwear
+editorial fashion outerwear
+high fashion outerwear
+celebrity outerwear
+modern outerwear
+streetwear jacket
+urban outerwear
+techwear jacket
+cyberpunk jacket
+futuristic coat
+tactical jacket
+combat jacket
+explorer jacket
+ranger cloak
+rogue cloak
+assassin cloak
+warrior cloak
+knight cape
+paladin cape
+mage robes
+wizard robes
+sorcerer cloak
+witch cloak
+elven cloak
+high elf cloak
+fae cloak
+royal mantle
+ceremonial mantle
+noble outerwear
+princess cape
+queen mantle
+king mantle
+prince cape
+steampunk coat
+victorian coat
+gothic coat
+gothic cape
+alternative outerwear
+punk jacket
+anime outerwear
+idol jacket
+stylized outerwear

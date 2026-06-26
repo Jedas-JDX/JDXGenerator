@@ -1,0 +1,131 @@
+plain background
+simple background
+minimal background
+clean background
+empty background
+solid color background
+white background
+pure white background
+bright white background
+black background
+pure black background
+dark background
+gray background
+light gray background
+dark gray background
+silver background
+gradient background
+soft gradient background
+subtle gradient background
+pastel gradient background
+multicolor gradient background
+blurred background
+soft blurred background
+heavily blurred background
+background blur
+depth of field blur
+bokeh background
+soft bokeh background
+cinematic bokeh background
+colorful bokeh background
+studio backdrop
+professional studio backdrop
+photography backdrop
+portrait backdrop
+fashion backdrop
+editorial backdrop
+seamless backdrop
+paper backdrop
+clean studio background
+neutral background
+neutral gray background
+neutral studio background
+soft color background
+pastel background
+light pastel background
+pink background
+soft pink background
+blue background
+soft blue background
+sky blue background
+green background
+mint green background
+purple background
+lavender background
+violet background
+red background
+deep red background
+orange background
+yellow background
+gold background
+golden background
+beige background
+cream background
+ivory background
+brown background
+teal background
+cyan background
+turquoise background
+monochrome background
+single color background
+uniform background
+smooth background
+clean composition background
+high key background
+low key background
+bright studio background
+dark studio background
+spotlight background
+soft spotlight background
+subtle lighting background
+simple portrait background
+minimal portrait background
+character sheet background
+reference sheet background
+concept art background
+presentation background
+showcase background
+product photography background
+catalog background
+isolated background
+cutout style background
+transparent style background
+floating background
+light glow background
+soft glow background
+ethereal background
+dreamy background
+misty background
+foggy background
+ambient background
+abstract background
+abstract color background
+geometric background
+minimal geometric background
+soft texture background
+paper texture background
+canvas texture background
+fabric texture background
+watercolor background
+soft watercolor wash
+painted backdrop
+digital backdrop
+studio wall background
+gallery wall background
+editorial background
+fashion photography background
+luxury backdrop
+premium studio background
+professional photography background
+anime style background
+stylized background
+cyberpunk color background
+neon gradient background
+holographic background
+iridescent background
+prismatic background
+celestial background
+starfield background
+moonlit background
+cloud background
+soft cloud background

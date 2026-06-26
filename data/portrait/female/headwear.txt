@@ -1,0 +1,143 @@
+baseball cap
+sports cap
+snapback cap
+trucker cap
+fitted cap
+fashion cap
+beret
+classic beret
+french beret
+artist beret
+military beret
+crown
+royal crown
+golden crown
+jeweled crown
+ornate crown
+imperial crown
+queen crown
+king crown
+tiara
+princess tiara
+royal tiara
+gemstone tiara
+elegant tiara
+witch hat
+classic witch hat
+ornate witch hat
+pointed witch hat
+mage hat
+sorcerer hat
+hood
+raised hood
+deep hood
+shadowed hood
+traveler hood
+cloak hood
+helmet
+combat helmet
+military helmet
+knight helmet
+fantasy helmet
+full helmet
+open face helmet
+circlet
+gold circlet
+silver circlet
+royal circlet
+elven circlet
+gemstone circlet
+flower crown
+rose crown
+wildflower crown
+laurel wreath
+vine crown
+leaf crown
+hair veil
+bridal veil
+lace veil
+ornamental veil
+royal veil
+nun veil
+headscarf
+silk headscarf
+fashion headscarf
+bandana
+patterned bandana
+pirate bandana
+cowboy hat
+western hat
+ranch hat
+straw hat
+sun hat
+wide brim hat
+elegant sun hat
+top hat
+victorian top hat
+ornate top hat
+steampunk top hat
+bowler hat
+fedora
+trilby hat
+newsboy cap
+flat cap
+beanie
+knit beanie
+winter beanie
+slouch beanie
+winter hat
+fur hat
+ushanka
+ear flap hat
+captain hat
+naval officer hat
+military cap
+officer cap
+ceremonial military hat
+pilot cap
+aviator cap
+chef hat
+academic cap
+graduation cap
+jester hat
+festival headwear
+tribal headdress
+ceremonial headdress
+warrior headdress
+feathered headdress
+royal headdress
+elven headdress
+high elf crown
+fae crown
+enchanted headwear
+arcane headwear
+celestial crown
+moon crown
+sun crown
+crystal crown
+dragon crown
+demonic horns
+small horns
+curved horns
+ram horns
+fantasy horns
+angel halo
+golden halo
+glowing halo
+celestial halo
+cyber headset
+cyber headgear
+neon headwear
+holographic visor
+tech headgear
+futuristic helmet
+anime headwear
+cute headwear
+idol headwear
+school headwear
+gothic headwear
+punk headwear
+alternative fashion headwear
+luxury headwear
+designer headwear
+ornate fashion headwear
