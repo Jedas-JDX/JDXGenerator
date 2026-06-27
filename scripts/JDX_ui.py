@@ -1,4 +1,6 @@
 import sys
+import json
+import random
 from pathlib import Path
 
 import gradio as gr
@@ -9,7 +11,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.append(str(SCRIPT_DIR))
 
-from procedural_engine import build_prompt, get_negative_prompt
+from procedural_engine import build_recipe, render_recipe
 
 
 def generate_prompt(
@@ -46,9 +48,20 @@ def generate_prompt(
 
     use_artstyle, use_style_theme,
     use_lighting, use_camera,
-    use_details, use_boosters, use_anima_artists
+    use_details, use_boosters, use_anima_artists,
+    seed=-1
 ):
-    prompt = build_prompt(
+    # -1 (or any negative) means "pick a fresh random seed". We resolve it to a
+    # concrete value, use it, and return it so the result can be reproduced.
+    # Kept in the 32-bit range so it round-trips exactly through the Number
+    # widget (JS numbers lose precision above 2^53).
+    if seed is None or int(seed) < 0:
+        actual_seed = random.randint(0, 2**32 - 1)
+    else:
+        actual_seed = int(seed)
+
+    recipe = build_recipe(
+        seed=actual_seed,
         category=category,
         gender=gender,
         model_name=model_name,
@@ -132,8 +145,10 @@ def generate_prompt(
         use_anima_artists=use_anima_artists
     )
 
-    negative_prompt = get_negative_prompt(model_name=model_name)
-    return prompt, negative_prompt
+    prompt = recipe["prompt"]
+    negative_prompt = recipe["negative_prompt"]
+    recipe_json = json.dumps(recipe, ensure_ascii=False)
+    return prompt, negative_prompt, actual_seed, recipe_json
 
 
 class Script(scripts.Script):
@@ -330,6 +345,22 @@ class Script(scripts.Script):
             )
 
             with gr.Row():
+                seed = gr.Number(value=-1, precision=0, label="Seed (-1 = random)")
+                random_seed_btn = gr.Button("🎲 Random Seed")
+                reuse_seed_btn = gr.Button("♻️ Reuse Last")
+                used_seed = gr.Number(value=-1, precision=0, label="Last Seed Used", interactive=False)
+
+            with gr.Accordion("Recipe", open=False):
+                recipe_box = gr.Textbox(
+                    lines=4,
+                    label="Recipe (JSON) — copy this to reproduce the prompt later",
+                    show_copy_button=True
+                )
+                with gr.Row():
+                    load_recipe_box = gr.Textbox(lines=3, label="Load Recipe (paste JSON)")
+                    load_recipe_btn = gr.Button("Load Recipe")
+
+            with gr.Row():
                 generate_btn = gr.Button("Generate Prompt")
                 clear_all_btn = gr.Button("Clear All")
                 send_to_prompt_btn = gr.Button("Send to Prompt")
@@ -368,13 +399,35 @@ class Script(scripts.Script):
 
                 use_artstyle, use_style_theme,
                 use_lighting, use_camera,
-                use_details, use_boosters, use_anima_artists
+                use_details, use_boosters, use_anima_artists,
+
+                seed
             ]
 
             generate_btn.click(
                 generate_prompt,
                 inputs=all_inputs,
-                outputs=[generated_prompt, negative_prompt]
+                outputs=[generated_prompt, negative_prompt, used_seed, recipe_box]
+            )
+
+            random_seed_btn.click(fn=lambda: -1, inputs=[], outputs=[seed])
+            reuse_seed_btn.click(fn=lambda s: s, inputs=[used_seed], outputs=[seed])
+
+            def _load_recipe(recipe_text):
+                text = (recipe_text or "").strip()
+                if not text:
+                    return gr.update(), gr.update(), gr.update(), gr.update()
+                try:
+                    data = json.loads(text)
+                except Exception as e:
+                    return f"[JDX] Invalid recipe JSON: {e}", gr.update(), gr.update(), gr.update()
+                p, n, s = render_recipe(data)
+                return p, n, int(s), int(s)
+
+            load_recipe_btn.click(
+                _load_recipe,
+                inputs=[load_recipe_box],
+                outputs=[generated_prompt, negative_prompt, seed, used_seed]
             )
 
             send_to_prompt_btn.click(
