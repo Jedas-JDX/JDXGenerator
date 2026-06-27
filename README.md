@@ -37,15 +37,32 @@ Instead of simply randomizing tags, JDX Generator follows a structured prompt fl
 
 # 📦 Installation
 
-## Stable Diffusion Forge
 
-1. Open Forge
-2. Go to **Extensions**
-3. Click **Install from URL**
-4. Paste the GitHub repository URL
-5. Click **Install**
-6. Restart Forge
+🛠️ (Forge)
 
+1. Open your Forge installation.
+
+2. Navigate to:
+
+extensions/
+
+3. Clone or download the JDX Generator repository into the extensions folder.
+
+4. Restart Forge.
+
+The JDX Generator will now appear as a new tab inside the Forge interface.
+
+
+🛠️ (ComfyUI)
+
+1. Download or clone this repository.
+2. Copy the JDX-Generator folder into:
+
+ComfyUI/custom_nodes/
+
+3. Restart ComfyUI.
+4. Import the included example workflow from the workflows folder.
+5. The JDX Generator nodes will now be available under the JDX-Generator category.
 ---
 
 # 🎯 Generation Modes
