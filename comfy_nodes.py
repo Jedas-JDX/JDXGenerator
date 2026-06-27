@@ -1,5 +1,8 @@
 import sys
+import os
 import copy
+import json
+import inspect
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent / "scripts"
@@ -7,11 +10,38 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.append(str(SCRIPT_DIR))
 
 try:
-    from procedural_engine import build_prompt, get_negative_prompt
+    from procedural_engine import (
+        build_prompt, build_recipe, render_recipe,
+        get_negative_prompt, validate_data,
+    )
 except ImportError:
     import scripts.procedural_engine as pe
     build_prompt = pe.build_prompt
+    build_recipe = pe.build_recipe
+    render_recipe = pe.render_recipe
     get_negative_prompt = pe.get_negative_prompt
+    validate_data = pe.validate_data
+
+# Valid build_prompt parameters, so a JDX_CONFIG dict can be forwarded safely
+# even if it later carries keys the engine does not accept.
+_BUILD_PARAMS = set(inspect.signature(build_prompt).parameters)
+
+
+def _kwargs_from_cfg(cfg, seed):
+    kw = {k: v for k, v in cfg.items() if k in _BUILD_PARAMS}
+    kw["seed"] = seed
+    return kw
+
+
+def _config_fingerprint(cfg, *extra):
+    try:
+        cfg_repr = json.dumps(cfg, sort_keys=True, default=str)
+    except Exception:
+        cfg_repr = repr(cfg)
+    import hashlib
+    payload = "|".join([cfg_repr] + [str(e) for e in extra])
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
 
 class JDXBaseConfig:
     @classmethod
@@ -167,116 +197,192 @@ class JDXGeneratePrompt:
         return {
             "required": {
                 "jdx_config": ("JDX_CONFIG",),
+                "seed": ("INT", {
+                    "default": 0,
+                    "min": 0,
+                    "max": 0xffffffffffffffff,
+                    "control_after_generate": True,
+                }),
             }
         }
 
-    RETURN_TYPES = ("STRING", "STRING",)
-    RETURN_NAMES = ("prompt", "negative_prompt",)
+    RETURN_TYPES = ("STRING", "STRING", "INT", "STRING",)
+    RETURN_NAMES = ("prompt", "negative_prompt", "seed", "recipe",)
+    FUNCTION = "execute"
+    CATEGORY = "JDXGenerator"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def IS_CHANGED(cls, jdx_config, seed):
+        # Re-run only when the seed or the config actually changes, so a fixed
+        # seed reproduces the same prompt (and is cached) instead of rerolling
+        # on every queue. With control_after_generate set to "randomize" the
+        # seed changes each run, which naturally triggers a fresh prompt.
+        return _config_fingerprint(jdx_config, seed)
+
+    def execute(self, jdx_config, seed):
+        cfg = copy.deepcopy(jdx_config)
+        recipe = build_recipe(**_kwargs_from_cfg(cfg, seed))
+        recipe_json = json.dumps(recipe, ensure_ascii=False)
+        prompt = recipe["prompt"]
+        negative_prompt = recipe["negative_prompt"]
+        # The "ui" payload is read by js/jdx_show_text.js to fill the read-only
+        # preview fields on the node; "result" is the normal output tuple.
+        return {
+            "ui": {"positive": [prompt], "negative": [negative_prompt]},
+            "result": (prompt, negative_prompt, seed, recipe_json),
+        }
+
+
+class JDXBatchGenerate:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "jdx_config": ("JDX_CONFIG",),
+                "seed": ("INT", {
+                    "default": 0,
+                    "min": 0,
+                    "max": 0xffffffffffffffff,
+                    "control_after_generate": True,
+                }),
+                "count": ("INT", {"default": 4, "min": 1, "max": 256}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "INT",)
+    RETURN_NAMES = ("prompts", "negative_prompts", "seeds",)
+    OUTPUT_IS_LIST = (True, True, True)
     FUNCTION = "execute"
     CATEGORY = "JDXGenerator"
 
     @classmethod
-    def IS_CHANGED(cls, jdx_config):
+    def IS_CHANGED(cls, jdx_config, seed, count):
+        return _config_fingerprint(jdx_config, seed, count)
+
+    def execute(self, jdx_config, seed, count):
+        cfg = copy.deepcopy(jdx_config)
+        prompts, negatives, seeds = [], [], []
+        for i in range(int(count)):
+            s = (int(seed) + i) & 0xffffffffffffffff
+            recipe = build_recipe(**_kwargs_from_cfg(cfg, s))
+            prompts.append(recipe["prompt"])
+            negatives.append(recipe["negative_prompt"])
+            seeds.append(s)
+        return (prompts, negatives, seeds)
+
+
+class JDXLoadRecipe:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "recipe": ("STRING", {"default": "", "multiline": True}),
+                "rebuild_from_parts": ("BOOLEAN", {"default": False}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "INT",)
+    RETURN_NAMES = ("prompt", "negative_prompt", "seed",)
+    FUNCTION = "execute"
+    CATEGORY = "JDXGenerator"
+
+    @classmethod
+    def IS_CHANGED(cls, recipe, rebuild_from_parts):
+        return _config_fingerprint(recipe, rebuild_from_parts)
+
+    def execute(self, recipe, rebuild_from_parts):
+        text = (recipe or "").strip()
+        if not text:
+            return ("", "", 0)
+        try:
+            data = json.loads(text)
+        except Exception as e:
+            return (f"[JDX] Invalid recipe JSON: {e}", "", 0)
+        prompt, negative_prompt, seed = render_recipe(data, rebuild=rebuild_from_parts)
+        return (prompt, negative_prompt, int(seed))
+
+
+class JDXSaveRecipe:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "recipe": ("STRING", {"forceInput": True}),
+                "filename_prefix": ("STRING", {"default": "jdx_recipe"}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("path",)
+    FUNCTION = "execute"
+    CATEGORY = "JDXGenerator"
+    OUTPUT_NODE = True
+
+    def _output_dir(self):
+        try:
+            import folder_paths
+            base = folder_paths.get_output_directory()
+        except Exception:
+            base = str(Path(__file__).resolve().parent)
+        out = os.path.join(base, "jdx_recipes")
+        os.makedirs(out, exist_ok=True)
+        return out
+
+    def execute(self, recipe, filename_prefix):
+        out_dir = self._output_dir()
+        # sanitise the prefix and find the next free counter
+        safe = "".join(c for c in (filename_prefix or "jdx_recipe")
+                       if c.isalnum() or c in ("-", "_")) or "jdx_recipe"
+        n = 1
+        while True:
+            path = os.path.join(out_dir, f"{safe}_{n:05}.json")
+            if not os.path.exists(path):
+                break
+            n += 1
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(recipe or "")
+        print(f"[JDX Generator] Saved recipe to {path}")
+        return (path,)
+
+
+class JDXValidateData:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "trigger": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING", "BOOLEAN",)
+    RETURN_NAMES = ("report", "ok",)
+    FUNCTION = "execute"
+    CATEGORY = "JDXGenerator"
+    OUTPUT_NODE = True
+
+    @classmethod
+    def IS_CHANGED(cls, trigger):
+        # Re-scan every run; wordlists may have changed on disk.
         import time
         return time.time()
 
-    def execute(self, jdx_config):
-        cfg = copy.deepcopy(jdx_config)
-        
-        # Build prompt extracts exactly what it needs from the config dictionary
-        prompt = build_prompt(
-            category=cfg.get("category", "portrait"),
-            gender=cfg.get("gender", "female"),
-            model_name=cfg.get("model_name", "flux"),
-            prompt_length=cfg.get("prompt_length", "medium"),
-            generation_mode=cfg.get("generation_mode", "smart"),
-            nsfw=cfg.get("nsfw", False),
-            use_nude=cfg.get("use_nude", False),
-            
-            use_subject=cfg.get("use_subject", False),
-            use_ethnicity=cfg.get("use_ethnicity", False),
-            use_skin_tone=cfg.get("use_skin_tone", False),
-            
-            use_hair_colors=cfg.get("use_hair_colors", False),
-            use_hairstyles=cfg.get("use_hairstyles", False),
-            use_beards=cfg.get("use_beards", False),
-            
-            use_eye_colors=cfg.get("use_eye_colors", False),
-            use_eye_shapes=cfg.get("use_eye_shapes", False),
-            use_eyebrows=cfg.get("use_eyebrows", False),
-            use_eyelashes=cfg.get("use_eyelashes", False),
-            
-            use_nose=cfg.get("use_nose", False),
-            use_lips=cfg.get("use_lips", False),
-            use_chin=cfg.get("use_chin", False),
-            use_jawline=cfg.get("use_jawline", False),
-            use_cheeks=cfg.get("use_cheeks", False),
-            use_face_shape=cfg.get("use_face_shape", False),
-            use_ears=cfg.get("use_ears", False),
-            use_earrings=cfg.get("use_earrings", False),
-            use_expression=cfg.get("use_expression", False),
-            use_makeup=cfg.get("use_makeup", False),
-            use_facial_features=cfg.get("use_facial_features", False),
-            use_face_piercings=cfg.get("use_face_piercings", False),
-            use_face_tattoos=cfg.get("use_face_tattoos", False),
-            
-            use_body_shape=cfg.get("use_body_shape", False),
-            use_height=cfg.get("use_height", False),
-            use_frame=cfg.get("use_frame", False),
-            use_waist=cfg.get("use_waist", False),
-            use_hips=cfg.get("use_hips", False),
-            use_butt=cfg.get("use_butt", False),
-            use_legs=cfg.get("use_legs", False),
-            use_shoulders=cfg.get("use_shoulders", False),
-            use_fitness=cfg.get("use_fitness", False),
-            use_proportions=cfg.get("use_proportions", False),
-            use_chest_size=cfg.get("use_chest_size", False),
-            use_chest_shape=cfg.get("use_chest_shape", False),
-            
-            use_upper_body=cfg.get("use_upper_body", False),
-            use_lower_body=cfg.get("use_lower_body", False),
-            use_legwear=cfg.get("use_legwear", False),
-            use_footwear=cfg.get("use_footwear", False),
-            use_outerwear=cfg.get("use_outerwear", False),
-            use_full_outfits=cfg.get("use_full_outfits", False),
-            use_mature_upper_body=cfg.get("use_mature_upper_body", False),
-            use_mature_lower_body=cfg.get("use_mature_lower_body", False),
-            use_mature_outfits=cfg.get("use_mature_outfits", False),
-            use_nipples=cfg.get("use_nipples", False),
-            use_areola=cfg.get("use_areola", False),
-            use_nsfw_actions=cfg.get("use_nsfw_actions", False),
-            use_pussy_cocks=cfg.get("use_pussy_cocks", False),
-            use_fashion_accessories=cfg.get("use_fashion_accessories", False),
-            use_headwear=cfg.get("use_headwear", False),
-            use_hair_accessories=cfg.get("use_hair_accessories", False),
-            use_eyewear=cfg.get("use_eyewear", False),
-            use_masks=cfg.get("use_masks", False),
-            
-            use_body_pose=cfg.get("use_body_pose", False),
-            use_hand_pose=cfg.get("use_hand_pose", False),
-            
-            use_interior=cfg.get("use_interior", False),
-            use_exterior=cfg.get("use_exterior", False),
-            use_simple_background=cfg.get("use_simple_background", False),
-            
-            use_artstyle=cfg.get("use_artstyle", False),
-            use_style_theme=cfg.get("use_style_theme", False),
-            use_lighting=cfg.get("use_lighting", False),
-            use_camera=cfg.get("use_camera", False),
-            use_details=cfg.get("use_details", False),
-            use_boosters=cfg.get("use_boosters", False),
-            use_anima_artists=cfg.get("use_anima_artists", False)
-        )
-        negative_prompt = get_negative_prompt(model_name=cfg.get("model_name", "flux"))
-        
-        return (prompt, negative_prompt)
+    def execute(self, trigger):
+        report, ok = validate_data()
+        print(report)
+        return (report, ok)
+
 
 NODE_CLASS_MAPPINGS = {
     "JDXBaseConfig": JDXBaseConfig,
     "JDXCharacterModifiers": JDXCharacterModifiers,
     "JDXClothingModifiers": JDXClothingModifiers,
     "JDXStyleModifiers": JDXStyleModifiers,
-    "JDXGeneratePrompt": JDXGeneratePrompt
+    "JDXGeneratePrompt": JDXGeneratePrompt,
+    "JDXBatchGenerate": JDXBatchGenerate,
+    "JDXLoadRecipe": JDXLoadRecipe,
+    "JDXSaveRecipe": JDXSaveRecipe,
+    "JDXValidateData": JDXValidateData,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -284,5 +390,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "JDXCharacterModifiers": "JDX 2. Character",
     "JDXClothingModifiers": "JDX 3. Clothing",
     "JDXStyleModifiers": "JDX 4. Style & Environment",
-    "JDXGeneratePrompt": "JDX 5. Generate Prompt"
+    "JDXGeneratePrompt": "JDX 5. Generate Prompt",
+    "JDXBatchGenerate": "JDX 6. Batch / Variations",
+    "JDXLoadRecipe": "JDX Load Recipe",
+    "JDXSaveRecipe": "JDX Save Recipe",
+    "JDXValidateData": "JDX Validate Data",
 }
