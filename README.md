@@ -121,6 +121,13 @@ Examples include:
 
 ---
 
+## Version 1.1
+
+ComfyUI integration
+
+---
+
+
 ## Future Versions
 
 - Intelligent Composition Engine
