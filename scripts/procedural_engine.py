@@ -77,6 +77,8 @@ def _weighted_pick(items, count, slot):
     return [tag for _, tag in keyed[:count]]
 
 
+
+
 def _parse_weighted_line(line):
     """Parse 'tag::3' into ('tag', 3.0); a bare 'tag' is weight 1.0.
 
@@ -163,6 +165,8 @@ def get_counts(prompt_length="medium"):
     prompt_length = prompt_length.lower()
 
     base = {
+        "races": 1,
+        "species": 1,
         "hair_colors": 1,
         "hairstyles": 1,
         "beards": 1,
@@ -199,7 +203,14 @@ def get_counts(prompt_length="medium"):
         "hair_accessories": 1,
         "eyewear": 1,
         "body_pose": 1,
+        "arm_pose": 1,
+        "leg_pose": 1,
+        "head_pose": 1,
         "hand_pose": 1,
+        "dynamic_pose": 1,
+        "cute_pose": 1,
+        "elegant_pose": 1,
+        "nsfw_pose": 1,
         "expression": 1,
         "interior": 1,
         "exterior": 1,
@@ -207,7 +218,8 @@ def get_counts(prompt_length="medium"):
         "artstyle": 1,
         "style_theme": 1,
         "lighting": 1,
-        "camera": 1,
+        "camera_settings": 1,
+        "camera_angles": 1,
         "details": 2,
         "masks": 1,
         "skin_tone": 1,
@@ -247,7 +259,8 @@ def get_counts(prompt_length="medium"):
             "artstyle": 2,
             "style_theme": 2,
             "lighting": 2,
-            "camera": 2,
+            "camera_settings": 2,
+            "camera_angles": 2,
             "details": 4,
             "facial_features": 2,
         })
@@ -292,7 +305,8 @@ def get_mode_settings(generation_mode="smart", prompt_length="medium"):
                 "artstyle": 2,
                 "style_theme": 3,
                 "lighting": 3,
-                "camera": 3,
+                "camera_settings": 3,
+                "camera_angles": 3,
                 "details": 6,
             }
         }
@@ -357,7 +371,8 @@ def get_mode_settings(generation_mode="smart", prompt_length="medium"):
             "expression": 1,
             "style_theme": 1,
             "lighting": 1,
-            "camera": 1,
+            "camera_settings": 1,
+        "camera_angles": 1,
             "details": 2 if prompt_length != "short" else 1,
         }
     }
@@ -501,7 +516,7 @@ def collect_parts(
     gender="female",
     prompt_length="medium",
     generation_mode="smart",
-    use_subject=True,
+    use_races=True,
     use_ethnicity=True,
     use_skin_tone=True,
     use_hair_colors=True,
@@ -554,7 +569,14 @@ def collect_parts(
     use_chest_shape=True,
     use_facial_features=True,
     use_body_pose=True,
+    use_arm_pose=True,
+    use_leg_pose=True,
+    use_head_pose=True,
     use_hand_pose=True,
+    use_dynamic_pose=True,
+    use_cute_pose=True,
+    use_elegant_pose=True,
+    use_nsfw_pose=True,
     use_expression=True,
     use_interior=True,
     use_exterior=True,
@@ -562,7 +584,8 @@ def collect_parts(
     use_artstyle=True,
     use_style_theme=True,
     use_lighting=True,
-    use_camera=True,
+    use_camera_settings=True,
+    use_camera_angles=True,
     use_details=True,
     use_anima_artists=False
 ):
@@ -572,7 +595,8 @@ def collect_parts(
     use_modular_clothing = not use_full_outfits if mode_settings.get("full_outfit_exclusive", True) else True
 
     parts = {
-        "subject": random_from_file(folder / "subject.txt") if use_subject else "",
+        "races": random_multiple_from_file(folder / "races.txt", counts["races"]) if use_races and category != "furry" else [],
+        "species": random_multiple_from_file(folder / "species.txt", counts["species"]) if use_races and category == "furry" else [],
         "ethnicity": random_multiple_from_file(folder / "ethnicity.txt", counts["ethnicity"]) if use_ethnicity else [],
         "skin_tone": random_multiple_from_file(folder / "skin_tone.txt", counts["skin_tone"]) if use_skin_tone else [],
 
@@ -591,7 +615,11 @@ def collect_parts(
         "lips": random_multiple_from_file(folder / "lips.txt", counts["lips"]) if use_lips else [],
         "nose": random_multiple_from_file(folder / "nose.txt", counts["nose"]) if use_nose else [],
         "chin": random_multiple_from_file(folder / "chin.txt", counts["chin"]) if use_chin else [],
-        "jawline": random_multiple_from_file(folder / "jawline.txt", counts["jawline"]) if use_jawline else [],
+        "jawline": random_multiple_from_first_existing_file([
+            folder / "jawline.txt",
+            folder / f"{gender}_jawline.txt",
+            DATA_DIR / category / f"{gender}_jawline.txt",
+        ], counts["jawline"]) if use_jawline else [],
         "cheeks": random_multiple_from_file(folder / "cheeks.txt", counts["cheeks"]) if use_cheeks else [],
         "face_shape": random_multiple_from_file(folder / "face_shape.txt", counts["face_shape"]) if use_face_shape else [],
         "face_piercings": random_multiple_from_file(folder / "face_piercings.txt", counts["face_piercings"]) if use_face_piercings else [],
@@ -642,7 +670,14 @@ def collect_parts(
         "proportions": random_multiple_from_file(folder / "proportions.txt", counts["proportions"]) if use_proportions else [],
         "facial_features": random_multiple_from_file(folder / "facial_features.txt", counts["facial_features"]) if use_facial_features else [],
         "body_pose": random_multiple_from_file(folder / "body_pose.txt", counts["body_pose"]) if use_body_pose else [],
+        "arm_pose": random_multiple_from_file(folder / "arm_pose.txt", counts["arm_pose"]) if use_arm_pose else [],
+        "leg_pose": random_multiple_from_file(folder / "leg_pose.txt", counts["leg_pose"]) if use_leg_pose else [],
+        "head_pose": random_multiple_from_file(folder / "head_pose.txt", counts["head_pose"]) if use_head_pose else [],
         "hand_pose": random_multiple_from_file(folder / "hand_pose.txt", counts["hand_pose"]) if use_hand_pose else [],
+        "dynamic_pose": random_multiple_from_file(folder / "dynamic_pose.txt", counts["dynamic_pose"]) if use_dynamic_pose else [],
+        "cute_pose": random_multiple_from_file(folder / "cute_pose.txt", counts["cute_pose"]) if use_cute_pose else [],
+        "elegant_pose": random_multiple_from_file(folder / "elegant_pose.txt", counts["elegant_pose"]) if use_elegant_pose else [],
+        "nsfw_pose": random_multiple_from_file(folder / "nsfw_pose.txt", counts["nsfw_pose"]) if use_nsfw_pose else [],
         "expression": random_multiple_from_file(folder / "expression.txt", counts["expression"]) if use_expression else [],
         "interior": random_multiple_from_file(folder / "interior.txt", counts["interior"]) if use_interior else [],
         "exterior": random_multiple_from_file(folder / "exterior.txt", counts["exterior"]) if use_exterior else [],
@@ -650,7 +685,8 @@ def collect_parts(
         "artstyle": random_multiple_from_file(folder / "artstyle.txt", counts["artstyle"]) if use_artstyle else [],
         "style_theme": random_multiple_from_file(folder / "style_theme.txt", counts["style_theme"]) if use_style_theme else [],
         "lighting": random_multiple_from_file(folder / "lighting.txt", counts["lighting"]) if use_lighting else [],
-        "camera": random_multiple_from_file(folder / "camera.txt", counts["camera"]) if use_camera else [],
+        "camera_settings": random_multiple_from_file(folder / "camera_settings.txt", counts["camera_settings"]) if use_camera_settings else [],
+        "camera_angles": random_multiple_from_file(folder / "camera_angles.txt", counts["camera_angles"]) if use_camera_angles else [],
         "details": random_multiple_from_file(folder / "details.txt", counts["details"]) if use_details else [],
         "anima_artists": random_multiple_from_file(PROMPT_LIBRARY_DIR / "anima_artists.txt", 1) if use_anima_artists else [],
     }
@@ -691,7 +727,6 @@ def get_furry_parts(category, gender):
     folder = DATA_DIR / category / gender
 
     return {
-        "species": random_multiple_from_file(folder / "species.txt", 1),
         "fur": random_multiple_from_file(folder / "fur.txt", 2),
         "ears": random_multiple_from_file(folder / "ears.txt", 1),
         "tail": random_multiple_from_file(folder / "tail.txt", 1),
@@ -781,19 +816,17 @@ def build_flux_prompt(parts, gender="female"):
     if parts.get("category") == "anime":
         anime_prefix = "anime style, anime artwork, anime illustration, "
 
-    subject = parts.get("subject", "")
+    races = p("races")
     species = p("species")
 
     if parts.get("category") == "furry":
         prompt = f"{anime_prefix}A highly detailed furry portrait of a {identity_text}"
+        if species:
+            prompt += f", {species} species"
     else:
         prompt = f"{anime_prefix}A highly detailed portrait of a {identity_text}"
-
-    if subject:
-        if species:
-            prompt += f", a {subject} of the {species} species"
-        else:
-            prompt += f", a {subject}"
+        if races:
+            prompt += f", {races}"
 
     sentences = [prompt + "."]
 
@@ -851,14 +884,14 @@ def build_flux_prompt(parts, gender="female"):
         sentences.append(f"Accessories include {join_parts(accessory_items)}.")
 
     # 7. POSE SLOT
-    pose_items = extend_from(["body_pose", "hand_pose"])
+    pose_items = extend_from(["body_pose","arm_pose","leg_pose","head_pose","hand_pose","dynamic_pose","cute_pose","elegant_pose","nsfw_pose"])
     if pose_items:
         sentences.append(f"{pronoun} is posed with {join_parts(pose_items)}.")
 
     # 8. CAMERA SLOT
-    camera = p("camera")
-    if camera:
-        sentences.append(f"Camera and composition: {camera}.")
+    camera_items = extend_from(["camera_settings", "camera_angles"])
+    if camera_items:
+        sentences.append(f"Camera and composition: {join_parts(camera_items)}.")
 
     # 9. LIGHTING SLOT
     lighting = p("lighting")
@@ -926,10 +959,8 @@ def build_anima_prompt(parts, gender="female"):
         )
     )
 
-    if parts.get("subject"):
-        prompt_parts.append(parts["subject"])
-
     # Same fixed slot order as Flux.
+    extend(["races"])
     extend(["ethnicity", "skin_tone"])
     extend(["species", "fur", "tail"])
 
@@ -964,8 +995,8 @@ def build_anima_prompt(parts, gender="female"):
         if item.lower() != "no mask"
     ])
 
-    extend(["body_pose", "hand_pose"])
-    extend(["camera"])
+    extend(["body_pose","arm_pose","leg_pose","head_pose","hand_pose","dynamic_pose","cute_pose","elegant_pose","nsfw_pose"])
+    extend(["camera_settings", "camera_angles"])
     extend(["lighting"])
     extend(["interior", "exterior", "simple_background"])
     extend(["artstyle"])
@@ -1171,10 +1202,9 @@ def build_prompt(
     model_name="flux",
     prompt_length="medium",
     generation_mode="smart",
-    seed=None,
     nsfw=False,
     use_nude=False,
-    use_subject=True,
+    use_races=True,
     use_ethnicity=True,
     use_skin_tone=True,
     use_hair_colors=True,
@@ -1228,24 +1258,29 @@ def build_prompt(
     use_chest_shape=True,
     use_facial_features=True,
     use_body_pose=True,
+    use_arm_pose=True,
+    use_leg_pose=True,
+    use_head_pose=True,
     use_hand_pose=True,
+    use_dynamic_pose=True,
+    use_cute_pose=True,
+    use_elegant_pose=True,
+    use_nsfw_pose=True,
     use_interior=True,
     use_exterior=True,
     use_simple_background=True,
     use_artstyle=True,
     use_style_theme=True,
     use_lighting=True,
-    use_camera=True,
+    use_camera_settings=True,
+    use_camera_angles=True,
     use_details=True,
     use_boosters=True,
     use_anima_artists=False,
+    seed=None,
     _return="prompt"
 ):
-    # Capture the toggle set up front (these are exactly the use_* parameters)
-    # so it can be stored in a recipe without listing every flag by hand.
     _toggles = {k: v for k, v in locals().items() if k.startswith("use_")}
-    # Seed first, before any tag is drawn, so the same seed + same toggles
-    # reproduce the exact same prompt every time.
     seed_engine(seed)
 
     parts = collect_parts(
@@ -1253,7 +1288,7 @@ def build_prompt(
         gender=gender,
         prompt_length=prompt_length,
         generation_mode=generation_mode,
-        use_subject=use_subject,
+        use_races=use_races,
         use_ethnicity=use_ethnicity,
         use_skin_tone=use_skin_tone,
         use_hair_colors=use_hair_colors,
@@ -1306,7 +1341,14 @@ def build_prompt(
         use_chest_shape=use_chest_shape,
         use_facial_features=use_facial_features,
         use_body_pose=use_body_pose,
+        use_arm_pose=use_arm_pose,
+        use_leg_pose=use_leg_pose,
+        use_head_pose=use_head_pose,
         use_hand_pose=use_hand_pose,
+        use_dynamic_pose=use_dynamic_pose,
+        use_cute_pose=use_cute_pose,
+        use_elegant_pose=use_elegant_pose,
+        use_nsfw_pose=use_nsfw_pose,
         use_expression=use_expression,
         use_interior=use_interior,
         use_exterior=use_exterior,
@@ -1314,7 +1356,8 @@ def build_prompt(
         use_artstyle=use_artstyle,
         use_style_theme=use_style_theme,
         use_lighting=use_lighting,
-        use_camera=use_camera,
+        use_camera_settings=use_camera_settings,
+        use_camera_angles=use_camera_angles,
         use_details=use_details,
         use_anima_artists=use_anima_artists
     )

@@ -72,7 +72,7 @@ class JDXCharacterModifiers:
             "required": {
                 "jdx_config": ("JDX_CONFIG",),
                 
-                "use_subject": ("BOOLEAN", {"default": False}),
+                "use_races": ("BOOLEAN", {"default": False}),
                 "use_ethnicity": ("BOOLEAN", {"default": False}),
                 "use_skin_tone": ("BOOLEAN", {"default": False}),
                 
@@ -168,14 +168,22 @@ class JDXStyleModifiers:
                 "jdx_config": ("JDX_CONFIG",),
                 
                 "use_body_pose": ("BOOLEAN", {"default": False}),
+                "use_arm_pose": ("BOOLEAN", {"default": False}),
+                "use_leg_pose": ("BOOLEAN", {"default": False}),
+                "use_head_pose": ("BOOLEAN", {"default": False}),
                 "use_hand_pose": ("BOOLEAN", {"default": False}),
+                "use_dynamic_pose": ("BOOLEAN", {"default": False}),
+                "use_cute_pose": ("BOOLEAN", {"default": False}),
+                "use_elegant_pose": ("BOOLEAN", {"default": False}),
+                "use_nsfw_pose": ("BOOLEAN", {"default": False}),
                 "use_interior": ("BOOLEAN", {"default": False}),
                 "use_exterior": ("BOOLEAN", {"default": False}),
                 "use_simple_background": ("BOOLEAN", {"default": False}),
                 "use_artstyle": ("BOOLEAN", {"default": False}),
                 "use_style_theme": ("BOOLEAN", {"default": False}),
                 "use_lighting": ("BOOLEAN", {"default": False}),
-                "use_camera": ("BOOLEAN", {"default": False}),
+                "use_camera_settings": ("BOOLEAN", {"default": False}),
+                "use_camera_angles": ("BOOLEAN", {"default": False}),
                 "use_details": ("BOOLEAN", {"default": False}),
                 "use_boosters": ("BOOLEAN", {"default": False}),
                 "use_anima_artists": ("BOOLEAN", {"default": False}),
@@ -222,6 +230,13 @@ class JDXGeneratePrompt:
 
     def execute(self, jdx_config, seed):
         cfg = copy.deepcopy(jdx_config)
+        # Back-compat for workflows saved before the race/camera split.
+        if "use_races" not in cfg and "use_subject" in cfg:
+            cfg["use_races"] = cfg.get("use_subject", False)
+        if "use_camera_settings" not in cfg and "use_camera" in cfg:
+            cfg["use_camera_settings"] = cfg.get("use_camera", False)
+        if "use_camera_angles" not in cfg and "use_camera" in cfg:
+            cfg["use_camera_angles"] = cfg.get("use_camera", False)
         recipe = build_recipe(**_kwargs_from_cfg(cfg, seed))
         recipe_json = json.dumps(recipe, ensure_ascii=False)
         prompt = recipe["prompt"]
@@ -262,6 +277,13 @@ class JDXBatchGenerate:
 
     def execute(self, jdx_config, seed, count):
         cfg = copy.deepcopy(jdx_config)
+        # Back-compat for workflows saved before the race/camera split.
+        if "use_races" not in cfg and "use_subject" in cfg:
+            cfg["use_races"] = cfg.get("use_subject", False)
+        if "use_camera_settings" not in cfg and "use_camera" in cfg:
+            cfg["use_camera_settings"] = cfg.get("use_camera", False)
+        if "use_camera_angles" not in cfg and "use_camera" in cfg:
+            cfg["use_camera_angles"] = cfg.get("use_camera", False)
         prompts, negatives, seeds = [], [], []
         for i in range(int(count)):
             s = (int(seed) + i) & 0xffffffffffffffff
@@ -387,9 +409,9 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "JDXBaseConfig": "JDX 1. Base Config",
-    "JDXCharacterModifiers": "JDX 2. Character",
+    "JDXCharacterModifiers": "JDX 2. Character / Race",
     "JDXClothingModifiers": "JDX 3. Clothing",
-    "JDXStyleModifiers": "JDX 4. Style & Environment",
+    "JDXStyleModifiers": "JDX 4. Style / Camera / Environment",
     "JDXGeneratePrompt": "JDX 5. Generate Prompt",
     "JDXBatchGenerate": "JDX 6. Batch / Variations",
     "JDXLoadRecipe": "JDX Load Recipe",
