@@ -1,0 +1,14 @@
+{
+  "_comment": "User-tunable conflict rules, applied AFTER the engine's built-in clothing/background logic. Slot names match the data file stems (e.g. hairstyles, outerwear, headwear, interior). 'directed_slot_rules': when the 'if_present' slot has any tag, every slot listed in 'remove' is cleared. 'exclusive_slot_groups': keep only one slot per group (chosen deterministically from the seed). Edit and save; changes are picked up automatically. The '_comment' and '_example' keys are ignored by the engine.",
+  "_example": {
+    "directed_slot_rules": [
+      { "if_present": "headwear", "remove": ["hairstyles", "hair_accessories"] },
+      { "if_present": "masks", "remove": ["makeup"] }
+    ],
+    "exclusive_slot_groups": [
+      ["interior", "exterior", "simple_background"]
+    ]
+  },
+  "directed_slot_rules": [],
+  "exclusive_slot_groups": []
+}

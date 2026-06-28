@@ -6,7 +6,11 @@ const JDX_COLORS = {
     "JDXCharacterModifiers": { bgcolor: "#0a1f2e", title_color: "#64b5f6" },
     "JDXClothingModifiers": { bgcolor: "#2e1a0b", title_color: "#ffb74d" },
     "JDXStyleModifiers": { bgcolor: "#0a2e16", title_color: "#81c784" },
-    "JDXGeneratePrompt": { bgcolor: "#2e0a16", title_color: "#e57373" }
+    "JDXGeneratePrompt": { bgcolor: "#2e0a16", title_color: "#e57373" },
+    "JDXBatchGenerate": { bgcolor: "#2e0a16", title_color: "#f06292" },
+    "JDXLoadRecipe": { bgcolor: "#16092e", title_color: "#9575cd" },
+    "JDXSaveRecipe": { bgcolor: "#16092e", title_color: "#9575cd" },
+    "JDXValidateData": { bgcolor: "#0a2e2e", title_color: "#4dd0e1" }
 };
 
 app.registerExtension({

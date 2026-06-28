@@ -2,45 +2,146 @@
 # Slot-based prompt order + Smart / Creative / Chaos rules.
 
 from pathlib import Path
+from functools import lru_cache
+import hashlib
+import json
 import random
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 PROMPT_LIBRARY_DIR = DATA_DIR / "prompt_library"
+RULES_DIR = DATA_DIR / "rules"
+
+ENGINE_VERSION = "1.2.0"
+
+
+# ---------------------------------------------------------------------------
+# Seeding
+#
+# A single master seed drives the whole generation, but every slot draws from
+# its OWN derived stream, and every candidate tag gets its OWN key. This means:
+#   * toggling one category off never shifts the result of another category,
+#   * reordering or adding lines in a .txt file does not disturb tags that were
+#     already there,
+#   * raising a slot's count is additive (the first pick stays, the next-best
+#     is added) instead of rerolling the whole slot.
+# Seeding stays isolated to this module, so it neither disturbs nor is disturbed
+# by any other node in the workflow.
+# ---------------------------------------------------------------------------
+_master_seed = None
+
+
+def seed_engine(seed=None):
+    """Set the master seed. Pass None for fully random (non-reproducible) output."""
+    global _master_seed
+    _master_seed = int(seed) if seed is not None else None
+
+
+def _derive_seed(*parts):
+    """Deterministically fold the master seed plus some labels into a 64-bit int."""
+    raw = "|".join(str(p) for p in parts).encode("utf-8")
+    return int.from_bytes(hashlib.sha256(raw).digest()[:8], "big")
+
+
+def _tag_unit(slot, tag):
+    """A stable uniform-[0,1) value for a (slot, tag) pair under the master seed."""
+    if _master_seed is None:
+        return random.random()
+    return random.Random(_derive_seed(_master_seed, slot, tag)).random()
+
+
+def _weighted_pick(items, count, slot):
+    """Pick `count` distinct tags from a weighted list using per-tag keys.
+
+    `items` is a sequence of (tag, weight) pairs. Selection uses the
+    Efraimidis-Spirakis scheme (key = u ** (1/weight)); the top-`count` keys
+    win, so higher weights are proportionally more likely without ever being
+    guaranteed. Keys are tied to the tag text, not its position, which is what
+    makes the result stable under reordering and unrelated edits.
+    """
+    if not items:
+        return []
+    count = max(0, min(int(count), len(items)))
+    if count == 0:
+        return []
+    keyed = []
+    for tag, weight in items:
+        weight = weight if weight and weight > 0 else 1.0
+        u = _tag_unit(slot, tag)
+        # u is in [0, 1); guard the exact-0 corner so the key stays well defined.
+        if u <= 0.0:
+            u = 1e-12
+        keyed.append((u ** (1.0 / weight), tag))
+    keyed.sort(key=lambda kv: kv[0], reverse=True)
+    return [tag for _, tag in keyed[:count]]
+
+
+
+
+def _parse_weighted_line(line):
+    """Parse 'tag::3' into ('tag', 3.0); a bare 'tag' is weight 1.0.
+
+    If the text after the last '::' is not a number it is treated as part of
+    the tag, so tags that legitimately contain '::' are left untouched.
+    """
+    if "::" in line:
+        tag, _, raw = line.rpartition("::")
+        try:
+            weight = float(raw.strip())
+            if weight <= 0:
+                weight = 1.0
+            return tag.strip(), weight
+        except ValueError:
+            return line, 1.0
+    return line, 1.0
+
+
+@lru_cache(maxsize=1024)
+def _load_list_cached(path_str, _mtime_ns):
+    """Read + parse a wordlist. Cached on (path, mtime) so file edits are picked
+    up automatically but unchanged files are not re-read on every draw."""
+    out = []
+    with open(path_str, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                out.append(_parse_weighted_line(line))
+    return tuple(out)
 
 
 def load_list(path):
-    if not path.exists():
-        print(f"[JDX Generator] Missing file: {path}")
+    """Return a tuple of (tag, weight) pairs for a wordlist, or () if missing."""
+    p = Path(path)
+    if not p.exists():
+        print(f"[JDX Generator] Missing file: {p}")
+        return ()
+    return _load_list_cached(str(p), p.stat().st_mtime_ns)
+
+
+def random_from_file(path, slot=None):
+    items = load_list(path)
+    if not items:
+        return ""
+    slot = slot or Path(path).stem
+    picked = _weighted_pick(items, 1, slot)
+    return picked[0] if picked else ""
+
+
+def random_multiple_from_file(path, count=1, slot=None):
+    items = load_list(path)
+    if not items:
         return []
-
-    with open(path, "r", encoding="utf-8") as f:
-        return [line.strip() for line in f.readlines() if line.strip()]
-
-
-def random_from_file(path):
-    values = load_list(path)
-    return random.choice(values) if values else ""
+    slot = slot or Path(path).stem
+    return _weighted_pick(items, count, slot)
 
 
-def random_multiple_from_file(path, count=1):
-    values = load_list(path)
-    if not values:
-        return []
-
-    count = min(count, len(values))
-    return random.sample(values, count)
-
-
-def random_multiple_from_first_existing_file(paths, count=1):
+def random_multiple_from_first_existing_file(paths, count=1, slot=None):
+    slot = slot or (Path(paths[0]).stem if paths else "")
     for path in paths:
-        values = load_list(path)
-
-        if values:
-            count = min(count, len(values))
-            return random.sample(values, count)
-
+        items = load_list(path)
+        if items:
+            return _weighted_pick(items, count, slot)
     return []
 
 
@@ -305,7 +406,11 @@ def apply_generation_mode_rules(parts, generation_mode="smart", nsfw=False, use_
         available = [key for key in keys if parts.get(key)]
         if len(available) <= 1:
             return
-        keep = random.choice(available)
+        if _master_seed is None:
+            keep = random.choice(available)
+        else:
+            picker = random.Random(_derive_seed(_master_seed, "group", *available))
+            keep = picker.choice(available)
         for key in available:
             if key != keep:
                 parts[key] = []
@@ -904,6 +1009,193 @@ def build_anima_prompt(parts, gender="female"):
 
 
 
+# ---------------------------------------------------------------------------
+# Conflict rules + dedupe
+# ---------------------------------------------------------------------------
+@lru_cache(maxsize=4)
+def _load_conflicts_cached(path_str, _mtime_ns):
+    with open(path_str, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def load_conflicts():
+    """Load the user-tunable conflict table (data/rules/conflicts.json).
+
+    Returns {} when the file is absent or invalid, so the engine always falls
+    back to its built-in clothing/background logic.
+    """
+    p = RULES_DIR / "conflicts.json"
+    if not p.exists():
+        return {}
+    try:
+        return _load_conflicts_cached(str(p), p.stat().st_mtime_ns)
+    except Exception as e:
+        print(f"[JDX Generator] Could not parse conflicts.json: {e}")
+        return {}
+
+
+def apply_conflict_rules(parts, conflicts):
+    """Apply user-defined conflicts AFTER the built-in rules.
+
+    directed_slot_rules: [{"if_present": "headwear", "remove": ["hairstyles"]}]
+        -> if the trigger slot has any tag, clear each listed target slot.
+    exclusive_slot_groups: [["interior", "exterior", "simple_background"]]
+        -> keep only one slot in the group (deterministic under the seed).
+    """
+    if not conflicts:
+        return parts
+
+    for rule in conflicts.get("directed_slot_rules", []):
+        trigger = rule.get("if_present")
+        if trigger and parts.get(trigger):
+            for target in rule.get("remove", []):
+                if target in parts:
+                    parts[target] = []
+
+    for group in conflicts.get("exclusive_slot_groups", []):
+        present = [k for k in group if parts.get(k)]
+        if len(present) > 1:
+            if _master_seed is None:
+                keep = random.choice(present)
+            else:
+                keep = random.Random(
+                    _derive_seed(_master_seed, "conflict", *present)
+                ).choice(present)
+            for k in present:
+                if k != keep:
+                    parts[k] = []
+
+    return parts
+
+
+def dedupe_parts(parts):
+    """Drop exact (case-insensitive) duplicate tags across all list-valued slots.
+
+    The subject string is seeded into 'seen' first so a list tag identical to
+    the subject is removed while the subject itself is preserved.
+    """
+    seen = set()
+    subject = parts.get("subject")
+    if isinstance(subject, str) and subject.strip():
+        seen.add(subject.strip().lower())
+
+    for key, value in parts.items():
+        if isinstance(value, list):
+            unique = []
+            for tag in value:
+                norm = tag.strip().lower()
+                if norm and norm not in seen:
+                    seen.add(norm)
+                    unique.append(tag)
+            parts[key] = unique
+
+    return parts
+
+
+# ---------------------------------------------------------------------------
+# Recipes (save / load for verbatim reproduction)
+# ---------------------------------------------------------------------------
+def build_recipe(**kwargs):
+    """Resolve a prompt and return a JSON-serialisable recipe dict.
+
+    Same arguments as build_prompt. The recipe carries the literal prompt and
+    negative prompt (for verbatim replay) plus the resolved selections and the
+    full config (for inspection / rebuild).
+    """
+    return build_prompt(_return="recipe", **kwargs)
+
+
+def render_recipe(recipe, rebuild=False):
+    """Return (prompt, negative_prompt, seed) from a recipe dict.
+
+    By default the stored literal text is returned, which reproduces the prompt
+    exactly even if the wordlists or engine have since changed. With
+    rebuild=True the prompt is re-assembled from the stored resolved parts.
+    """
+    seed = int(recipe.get("seed") or 0)
+    if rebuild and isinstance(recipe.get("parts"), dict):
+        parts = dict(recipe["parts"])
+        gender = recipe.get("gender", "female")
+        model = (recipe.get("model_name", "flux") or "flux").lower()
+        if model == "anima":
+            prompt = build_anima_prompt(parts, gender=gender)
+        else:
+            prompt = build_flux_prompt(parts, gender=gender)
+        return prompt, get_negative_prompt(model), seed
+    return recipe.get("prompt", ""), recipe.get("negative_prompt", ""), seed
+
+
+# ---------------------------------------------------------------------------
+# Data validation
+# ---------------------------------------------------------------------------
+def validate_data(categories=("portrait", "anime", "furry"), genders=("female", "male")):
+    """Scan the wordlists and report problems. Returns (report_text, is_ok)."""
+    lines = []
+    problems = 0
+    total_files = 0
+    total_tags = 0
+
+    for cat in categories:
+        per_gender_files = {}
+        for g in genders:
+            d = DATA_DIR / cat / g
+            if not d.is_dir():
+                lines.append(f"[MISSING DIR] {cat}/{g}")
+                problems += 1
+                continue
+            files = sorted(p.name for p in d.glob("*.txt"))
+            per_gender_files[g] = set(files)
+            for name in files:
+                total_files += 1
+                items = load_list(d / name)
+                if not items:
+                    lines.append(f"[EMPTY] {cat}/{g}/{name}")
+                    problems += 1
+                    continue
+                total_tags += len(items)
+                lowered = [t.strip().lower() for t, _ in items]
+                dupes = len(lowered) - len(set(lowered))
+                if dupes:
+                    lines.append(f"[DUPES x{dupes}] {cat}/{g}/{name}")
+                    problems += 1
+
+        # Cross-gender asymmetry within the SAME category is only informational
+        # (female/male lists can legitimately differ, e.g. nsfw_subject).
+        if len(per_gender_files) == 2:
+            a, b = genders
+            only_a = sorted(per_gender_files.get(a, set()) - per_gender_files.get(b, set()))
+            only_b = sorted(per_gender_files.get(b, set()) - per_gender_files.get(a, set()))
+            if only_a:
+                lines.append(f"[INFO] {cat}: only in {a}: {', '.join(only_a)}")
+            if only_b:
+                lines.append(f"[INFO] {cat}: only in {b}: {', '.join(only_b)}")
+
+    for name in ("anima_artists.txt", "anima_boosters.txt", "flux_boosters.txt"):
+        p = PROMPT_LIBRARY_DIR / name
+        if not p.exists():
+            lines.append(f"[MISSING] prompt_library/{name}")
+            problems += 1
+        elif not load_list(p):
+            lines.append(f"[EMPTY] prompt_library/{name}")
+            problems += 1
+
+    cp = RULES_DIR / "conflicts.json"
+    if cp.exists():
+        try:
+            json.loads(cp.read_text(encoding="utf-8"))
+            lines.append("[OK] rules/conflicts.json parses")
+        except Exception as e:
+            lines.append(f"[BAD JSON] rules/conflicts.json: {e}")
+            problems += 1
+
+    header = (
+        f"JDX data check — {total_files} files, {total_tags} tags. "
+        + ("All good." if problems == 0 else f"{problems} issue(s) found.")
+    )
+    body = "\n".join(lines[:120])
+    return (header + ("\n" + body if body else ""), problems == 0)
+
+
 def build_prompt(
     category="portrait",
     gender="female",
@@ -984,8 +1276,13 @@ def build_prompt(
     use_camera_angles=True,
     use_details=True,
     use_boosters=True,
-    use_anima_artists=False
+    use_anima_artists=False,
+    seed=None,
+    _return="prompt"
 ):
+    _toggles = {k: v for k, v in locals().items() if k.startswith("use_")}
+    seed_engine(seed)
+
     parts = collect_parts(
         category=category,
         gender=gender,
@@ -1075,13 +1372,35 @@ def build_prompt(
     )
 
     parts = apply_generation_mode_rules(parts, generation_mode, nsfw=nsfw, use_nude=use_nude)
+    parts = apply_conflict_rules(parts, load_conflicts())
+    parts = dedupe_parts(parts)
 
-    model_name = model_name.lower()
+    if model_name.lower() == "anima":
+        prompt = build_anima_prompt(parts, gender=gender)
+    else:
+        prompt = build_flux_prompt(parts, gender=gender)
 
-    if model_name == "anima":
-        return build_anima_prompt(parts, gender=gender)
+    if _return == "recipe":
+        return {
+            "engine_version": ENGINE_VERSION,
+            "seed": seed,
+            "category": category,
+            "gender": gender,
+            "model_name": model_name,
+            "prompt_length": prompt_length,
+            "generation_mode": generation_mode,
+            "nsfw": nsfw,
+            "use_nude": use_nude,
+            "toggles": _toggles,
+            "parts": {
+                k: (list(v) if isinstance(v, (list, tuple)) else v)
+                for k, v in parts.items()
+            },
+            "prompt": prompt,
+            "negative_prompt": get_negative_prompt(model_name),
+        }
 
-    return build_flux_prompt(parts, gender=gender)
+    return prompt
 
 
 def get_negative_prompt(model_name="flux"):
