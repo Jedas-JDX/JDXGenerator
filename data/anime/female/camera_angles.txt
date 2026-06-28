@@ -1,0 +1,65 @@
+front view
+back view
+side view
+left profile
+right profile
+three quarter view
+three quarter back view
+eye level shot
+low angle shot
+high angle shot
+bird's eye view
+worm's eye view
+overhead shot
+top down shot
+bottom up shot
+close up
+extreme close up
+medium close up
+medium shot
+medium full shot
+full body shot
+wide shot
+extreme wide shot
+long shot
+establishing shot
+portrait shot
+head shot
+bust shot
+cowboy shot
+knee shot
+hip shot
+shoulder shot
+dynamic angle
+dutch angle
+canted angle
+over the shoulder shot
+point of view shot
+POV shot
+first person perspective
+third person perspective
+isometric view
+rear view
+looking up
+looking down
+looking at viewer
+camera above subject
+camera below subject
+camera behind subject
+camera in front of subject
+camera to the side
+centered composition
+off center composition
+symmetrical composition
+asymmetrical composition
+diagonal composition
+wide perspective
+compressed perspective
+tracking shot
+follow shot
+orbit shot
+pan shot
+tilted perspective
+dramatic perspective
+hero shot
+cinematic hero shot

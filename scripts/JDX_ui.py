@@ -17,7 +17,7 @@ from procedural_engine import build_recipe, render_recipe
 def generate_prompt(
     category, gender, model_name, prompt_length, generation_mode, nsfw, use_nude,
 
-    use_subject, use_ethnicity, use_skin_tone,
+    use_races, use_ethnicity, use_skin_tone,
 
     use_hair_colors, use_hairstyles, use_beards,
 
@@ -42,12 +42,13 @@ def generate_prompt(
     use_headwear, use_hair_accessories, use_eyewear,
     use_masks,
 
-    use_body_pose, use_hand_pose,
+    use_body_pose, use_arm_pose, use_leg_pose, use_head_pose,
+    use_hand_pose, use_dynamic_pose, use_cute_pose, use_elegant_pose, use_nsfw_pose,
 
     use_interior, use_exterior, use_simple_background,
 
     use_artstyle, use_style_theme,
-    use_lighting, use_camera,
+    use_lighting, use_camera_settings, use_camera_angles,
     use_details, use_boosters, use_anima_artists,
     seed=-1
 ):
@@ -70,7 +71,7 @@ def generate_prompt(
         nsfw=nsfw,
         use_nude=use_nude,
 
-        use_subject=use_subject,
+        use_races=use_races,
         use_ethnicity=use_ethnicity,
         use_skin_tone=use_skin_tone,
 
@@ -130,7 +131,14 @@ def generate_prompt(
         use_masks=use_masks,
 
         use_body_pose=use_body_pose,
+        use_arm_pose=use_arm_pose,
+        use_leg_pose=use_leg_pose,
+        use_head_pose=use_head_pose,
         use_hand_pose=use_hand_pose,
+        use_dynamic_pose=use_dynamic_pose,
+        use_cute_pose=use_cute_pose,
+        use_elegant_pose=use_elegant_pose,
+        use_nsfw_pose=use_nsfw_pose,
 
         use_interior=use_interior,
         use_exterior=use_exterior,
@@ -139,7 +147,8 @@ def generate_prompt(
         use_artstyle=use_artstyle,
         use_style_theme=use_style_theme,
         use_lighting=use_lighting,
-        use_camera=use_camera,
+        use_camera_settings=use_camera_settings,
+        use_camera_angles=use_camera_angles,
         use_details=use_details,
         use_boosters=use_boosters,
         use_anima_artists=use_anima_artists
@@ -203,7 +212,7 @@ class Script(scripts.Script):
 
                             with gr.Column():
                                 gr.Markdown("### Core")
-                                use_subject = gr.Checkbox(value=False, label="Subject")
+                                use_races = gr.Checkbox(value=False, label="Races / Species")
                                 use_ethnicity = gr.Checkbox(value=False, label="Ethnicity")
                                 use_skin_tone = gr.Checkbox(value=False, label="Skin Tone")
 
@@ -288,7 +297,14 @@ class Script(scripts.Script):
                             with gr.Column():
                                 gr.Markdown("### Posing")
                                 use_body_pose = gr.Checkbox(value=False, label="Body Pose")
+                                use_arm_pose = gr.Checkbox(value=False, label="Arm Pose")
+                                use_leg_pose = gr.Checkbox(value=False, label="Leg Pose")
+                                use_head_pose = gr.Checkbox(value=False, label="Head Pose")
                                 use_hand_pose = gr.Checkbox(value=False, label="Hand Pose")
+                                use_dynamic_pose = gr.Checkbox(value=False, label="Dynamic Pose")
+                                use_cute_pose = gr.Checkbox(value=False, label="Cute Pose")
+                                use_elegant_pose = gr.Checkbox(value=False, label="Elegant Pose")
+                                use_nsfw_pose = gr.Checkbox(value=False, label="NSFW Pose" )
 
                             with gr.Column():
                                 gr.Markdown("### Background")
@@ -301,7 +317,8 @@ class Script(scripts.Script):
                                 use_artstyle = gr.Checkbox(value=False, label="Artstyle")
                                 use_style_theme = gr.Checkbox(value=False, label="Style Theme")
                                 use_lighting = gr.Checkbox(value=False, label="Lighting")
-                                use_camera = gr.Checkbox(value=False, label="Camera")
+                                use_camera_settings = gr.Checkbox(value=False, label="Camera Settings")
+                                use_camera_angles = gr.Checkbox(value=False, label="Camera Angles")
                                 use_details = gr.Checkbox(value=False, label="Details")
                                 use_boosters = gr.Checkbox(value=False, label="Boosters")
                                 use_anima_artists = gr.Checkbox(value=False, label="Anima Artists")
@@ -368,7 +385,7 @@ class Script(scripts.Script):
             all_inputs = [
                 category, gender, model_name, prompt_length, generation_mode, nsfw, use_nude,
 
-                use_subject, use_ethnicity, use_skin_tone,
+                use_races, use_ethnicity, use_skin_tone,
 
                 use_hair_colors, use_hairstyles, use_beards,
 
@@ -393,14 +410,15 @@ class Script(scripts.Script):
                 use_headwear, use_hair_accessories, use_eyewear,
                 use_masks,
 
-                use_body_pose, use_hand_pose,
+                use_body_pose, use_arm_pose, use_leg_pose, use_head_pose,
+    use_hand_pose, use_dynamic_pose, use_cute_pose, use_elegant_pose, use_nsfw_pose,
 
                 use_interior, use_exterior, use_simple_background,
 
                 use_artstyle, use_style_theme,
-                use_lighting, use_camera,
-                use_details, use_boosters, use_anima_artists,
 
+                use_lighting, use_camera_settings, use_camera_angles,
+                use_details, use_boosters, use_anima_artists,
                 seed
             ]
 

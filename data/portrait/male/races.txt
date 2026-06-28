@@ -1,0 +1,91 @@
+human boy
+human man
+elf boy
+elf man
+high elf man
+wood elf man
+dark elf man
+half elf man
+orc man
+half orc man
+goblin man
+hobgoblin
+ogre
+giant
+dwarf man
+halfling man
+gnome man
+centaur man
+satyr
+faun
+kitsune boy
+neko boy
+wolf boy
+fox boy
+cat boy
+bunny boy
+deer boy
+cow boy
+dragon boy
+dragonkin man
+lizard man
+slime boy
+spider boy
+moth boy
+bee boy
+demon boy
+incubus
+oni man
+angel man
+fallen angel man
+seraph man
+vampire man
+dhampir man
+werewolf man
+zombie man
+ghost man
+spirit man
+phantom man
+skeleton warrior
+reaper
+warlock
+mage
+sorcerer
+necromancer
+paladin
+knight
+samurai
+ninja
+pirate
+priest
+android man
+cyborg man
+robot man
+mecha boy
+alien man
+extraterrestrial man
+cosmic being
+celestial being
+void creature
+eldritch being
+monster boy
+chimera man
+tiefling man
+demonkin man
+beastkin man
+bird man
+fish man
+frog boy
+snake boy
+plant boy
+living doll boy
+puppet boy
+homunculus man
+golem man
+fire elemental man
+water elemental man
+earth elemental man
+air elemental man
+ice elemental man
+light elemental man
+dark elemental man
