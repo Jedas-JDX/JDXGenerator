@@ -1,20 +1,209 @@
-fox
 wolf
+fox
+red fox
+fennec fox
+arctic fox
 cat
+house cat
 tiger
 lion
 panther
-rabbit
-deer
-dragon
-fennec
-otter
-red panda
-snow leopard
+leopard
+cheetah
 lynx
-arctic fox
-hyena
-coyote
+snow leopard
+jaguar
+cougar
+rabbit
+bunny
+hare
+deer
+elk
+moose
+reindeer
+gazelle
+antelope
+horse
+pony
+unicorn
+pegasus
+cow
+bull
+buffalo
+bison
+goat
+sheep
+ram
+pig
+boar
+mouse
+rat
+hamster
+squirrel
+chipmunk
 raccoon
+red panda
+panda
+bear
+polar bear
+grizzly bear
+koala
+otter
+ferret
+weasel
+badger
+wolverine
+skunk
+hyena
+dog
+husky
+shiba inu
+akita
+corgi
+golden retriever
+german shepherd
+doberman
+wolfdog
+jackal
+coyote
+dingo
 bat
+fruit bat
+dragon
+western dragon
+eastern dragon
+wyvern
+drake
+serpent dragon
+lizard
+gecko
+iguana
+komodo dragon
+crocodile
+alligator
+snake
+cobra
+python
+viper
+rattlesnake
+turtle
+tortoise
+frog
+toad
+salamander
+axolotl
+shark
+great white shark
+hammerhead shark
+tiger shark
+orca
+dolphin
+whale
+beluga whale
+narwhal
+seal
+sea lion
+walrus
+octopus
+squid
+jellyfish
+crab
+lobster
+shrimp
+seahorse
+koi fish
+goldfish
+salmon
+tuna
+piranha
+eel
+bird
+eagle
+hawk
+falcon
+owl
+snowy owl
+crow
+raven
+parrot
+macaw
+cockatoo
+penguin
+duck
+goose
+swan
+peacock
+phoenix
 griffin
+gryphon
+harpy eagle
+chicken
+rooster
+turkey
+pigeon
+dove
+sparrow
+hummingbird
+moth
+butterfly
+bee
+wasp
+hornet
+dragonfly
+ladybug
+beetle
+spider
+tarantula
+scorpion
+mantis
+ant
+firefly
+moth dragon
+slime
+slime wolf
+slime fox
+slime cat
+plant creature
+mushroom creature
+flower creature
+tree spirit
+elemental
+fire elemental
+water elemental
+earth elemental
+air elemental
+ice elemental
+light elemental
+shadow creature
+void creature
+ghost
+spirit
+demon beast
+angelic beast
+chimera
+cerberus
+hydra
+minotaur
+satyr
+lamia
+naga
+kitsune
+tanuki
+kirin
+qilin
+baku
+yokai
+alien
+cosmic creature
+eldritch creature
+living plush
+living doll
+golem
+crystal creature
+gem beast
+mechanical beast
+robot animal
+cyber beast
+cyber wolf
+cyber fox
+cyber cat
