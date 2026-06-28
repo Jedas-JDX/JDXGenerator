@@ -1,0 +1,30 @@
+action pose
+hero pose
+battle stance
+combat pose
+running pose
+sprinting pose
+jumping pose
+mid jump pose
+landing pose
+fighting pose
+martial arts pose
+casting spell
+shooting pose
+sword stance
+attack pose
+defensive pose
+victory pose
+dramatic pose
+spinning pose
+dashing pose
+parkour pose
+flying pose
+charging pose
+dodging pose
+ready stance
+athletic pose
+power pose
+epic pose
+cinematic pose
+adventure pose
